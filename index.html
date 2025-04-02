@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartoon Typing Tutor 🎮</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap');
+        
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --dark: #292F36;
+            --light: #F7FFF7;
+            --accent: #FFE66D;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+        
+        header {
+            background-color: var(--primary);
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+            text-shadow: 3px 3px 0 var(--dark);
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .level-select {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .level-btn {
+            background-color: var(--secondary);
+            color: var(--dark);
+            border: none;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 0 var(--dark);
+        }
+        
+        .level-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 0 var(--dark);
+        }
+        
+        .level-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 var(--dark);
+        }
+        
+        .level-btn.locked {
+            background-color: #555;
+            color: #999;
+            cursor: not-allowed;
+        }
+        
+        .level-btn.completed {
+            background-color: var(--accent);
+            color: var(--dark);
+        }
+        
+        .game-area {
+            background-color: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+        
+        .instructions {
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        
+        .target-text {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            min-height: 2.5em;
+            line-height: 1.4;
+            background-color: rgba(255,255,255,0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+        }
+        
+        .target-text span.correct {
+            color: #4CAF50;
+        }
+        
+        .target-text span.incorrect {
+            color: #F44336;
+            text-decoration: underline;
+        }
+        
+        .target-text span.current {
+            background-color: var(--accent);
+            color: var(--dark);
+            padding: 0 2px;
+            border-radius: 3px;
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        #user-input {
+            flex-grow: 1;
+            padding: 0.8rem;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 6px;
+            font-family: monospace;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-box {
+            background-color: rgba(0,0,0,0.3);
+            padding: 0.8rem;
+            border-radius: 8px;
+            text-align: center;
+            flex: 1;
+            margin: 0 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background-color: #FF5252;
+            transform: translateY(-2px);
+        }
+        
+        .practice-mode {
+            background-color: var(--secondary);
+            color: var(--dark);
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .song-player {
+            margin-top: 1rem;
+            width: 100%;
+            border-radius: 8px;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 5px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: var(--accent);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        /* Profile Button */
+        #profile-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background-color: var(--accent);
+            color: var(--dark);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        #profile-btn img {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+        
+        /* Profile Modal */
+        #profile-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #profile-modal > div {
+            background: var(--dark);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+        }
+        
+        #avatar-preview {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        #current-avatar {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 0.5rem;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 50%;
+            background-color: var(--dark);
+            border: 3px solid var(--accent);
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+        }
+        
+        #avatar-name {
+            font-weight: bold;
+            color: var(--accent);
+        }
+        
+        #profile-list {
+            margin-bottom: 1.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        #profile-list div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        #profile-list div:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        #profile-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #profile-list::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+            border-radius: 4px;
+        }
+        
+        #profile-list::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+        
+        #profile-list::-webkit-scrollbar-thumb:hover {
+            background: #FF5252;
+        }
+        
+        /* Avatar Grid */
+        #avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        #avatar-grid div {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        #avatar-grid div:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px var(--accent);
+        }
+        
+        @media (max-width: 768px) {
+            .level-select {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+            }
+            
+            .stats {
+                flex-wrap: wrap;
+            }
+            
+            .stat-box {
+                flex: 1 0 45%;
+                margin-bottom: 0.5rem;
+            }
+            
+            #avatar-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .level-select {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            #avatar-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* Keyboard highlight */
+        .keyboard-key {
+            display: inline-block;
+            padding: 0.2rem 0.4rem;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            margin: 0.1rem;
+            font-family: monospace;
+        }
+        
+        .keyboard-key.active {
+            background-color: var(--accent);
+            color: var(--dark);
+            transform: scale(1.1);
+            box-shadow: 0 0 8px var(--accent);
+        }
+        
+        /* Completion animation */
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: var(--accent);
+            opacity: 0;
+            animation: confetti 3s forwards;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>CARTOON TYPING TUTOR</h1>
+        <button id="profile-btn">👤 Profiles</button>
+    </header>
+    
+    <div class="container">
+        <div class="level-select" id="level-select">
+            <!-- Levels will be added by JavaScript -->
+        </div>
+        
+        <div class="game-area" id="game-area">
+            <div class="instructions" id="instructions"></div>
+            <div class="target-text" id="target-text"></div>
+            <div class="input-area">
+                <input type="text" id="user-input" placeholder="Start typing here...">
+            </div>
+            <div class="stats">
+                <div class="stat-box">
+                    <div>Level</div>
+                    <div class="stat-value" id="current-level">1</div>
+                </div>
+                <div class="stat-box">
+                    <div>Progress</div>
+                    <div class="stat-value" id="progress">0%</div>
+                </div>
+                <div class="stat-box">
+                    <div>Accuracy</div>
+                    <div class="stat-value" id="accuracy">100%</div>
+                </div>
+                <div class="stat-box">
+                    <div>Speed</div>
+                    <div class="stat-value" id="wpm-display">0 WPM</div>
+                </div>
+            </div>
+            <div class="controls">
+                <button id="restart-btn">Restart Level</button>
+                <button id="back-btn">Back to Levels</button>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+        </div>
+        
+        <div class="practice-mode" id="practice-mode">
+            <h2>🎵 FUN PRACTICE MODE 🎵</h2>
+            <p>Practice typing with your favorite cartoon theme songs!</p>
+            <select id="song-select">
+            <option value="doraemon">Doraemon Theme (Indian Version)</option>
+            <option value="iasmejo">IASME JO Theme</option>
+            <option value="iasmejo-chunked">IASME JO Theme (Chunked)</option>
+            <option value="iasmejo">IASME JO Theme</option>
+
+
+
+                <option value="pokemon">Pokemon Theme</option>
+                <option value="shinchan">Shin Chan Theme</option>
+                <option value="powerrangers">Power Rangers Theme</option>
+                <option value="johnnytest">Johnny Test Theme</option>
+                <option value="tommijerry">Tom & Jerry Theme</option>
+                <option value="tarakmehta">Tarak Mehta Ka Ooltah Chashmah</option>
+                <option value="motupatlu">Motu Patlu Theme</option>
+                <option value="rollno21">Roll No. 21 Theme</option>
+            </select>
+            <button id="start-practice">Start Practice</button>
+            <div id="song-lyrics" class="target-text"></div>
+            <audio controls class="song-player" id="song-player"></audio>
+        </div>
+    </div>
+
+    <!-- Profile Management Modal -->
+    <div id="profile-modal">
+        <div>
+            <h2 style="color:var(--accent); margin-bottom:1rem;">Manage Profiles</h2>
+            
+            <div id="avatar-preview">
+                <div id="current-avatar">👤</div>
+                <div id="avatar-name">Select Avatar</div>
+            </div>
+            
+            <div id="profile-list"></div>
+            
+            <h3 style="color:var(--light); margin:1rem 0 0.5rem;">Choose Avatar:</h3>
+            <div id="avatar-grid"></div>
+            
+            <div style="display:flex; gap:1rem;">
+                <input type="text" id="new-profile-name" placeholder="New profile name" style="flex-grow:1; padding:0.8rem; border-radius:6px; border:none;">
+                <button id="add-profile-btn" style="background:var(--primary); color:white; border:none; padding:0.8rem 1.5rem; border-radius:6px; cursor:pointer;">Add</button>
+            </div>
+            <button id="close-profile-modal" style="margin-top:1.5rem; width:100%; background:var(--secondary); color:var(--dark); border:none; padding:0.8rem; border-radius:6px; cursor:pointer;">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // Game Data
+        const levels = [
+            {
+                title: "Level 1: Home Row",
+                description: "Practice the home row keys: <span class='keyboard-key'>A</span> <span class='keyboard-key'>S</span> <span class='keyboard-key'>D</span> <span class='keyboard-key'>F</span> <span class='keyboard-key'>J</span> <span class='keyboard-key'>K</span> <span class='keyboard-key'>L</span> <span class='keyboard-key'>;</span>",
+                text: "asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl;"
+            },
+            {
+                title: "Level 2: Simple Words",
+                description: "Type simple 3-4 letter words",
+                text: "the cat ran and dog bit but man sat for her his not you all she was one has now"
+            },
+            {
+                title: "Level 3: Common Words",
+                description: "Practice with common English words",
+                text: "hello world this is a typing test practice makes perfect keep trying your best to improve speed and accuracy"
+            },
+            {
+                title: "Level 4: Short Sentences",
+                description: "Type complete short sentences",
+                text: "The quick brown fox jumps. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump!"
+            },
+            {
+                title: "Level 5: Numbers & Symbols",
+                description: "Mix of letters, numbers and symbols",
+                text: "123 456 789 0! @#$ %^& *() _+-= {}[] |\\:;\"'<>?,./~`"
+            },
+            {
+                title: "Level 6: Longer Sentences",
+                description: "More complex sentences with punctuation",
+                text: "Despite the heavy rain, the determined hikers continued their journey up the mountain. 'We should turn back,' suggested Mark, but Lisa insisted they push forward."
+            },
+            {
+                title: "Level 7: Capitalization",
+                description: "Proper use of capital letters",
+                text: "New Delhi is the capital of India. The Eiffel Tower is in Paris, France. Dr. Smith works at St. Mary's Hospital. I love watching Star Wars and Harry Potter."
+            },
+            {
+                title: "Level 8: Speed Challenge",
+                description: "Test your typing speed",
+                text: "The five boxing wizards jump quickly. How razorback-jumping frogs can level six piqued gymnasts! Crazy Frederick bought many very exquisite opal jewels."
+            },
+            {
+                title: "Level 9: Paragraph Practice",
+                description: "Type full paragraphs",
+                text: "The Internet has revolutionized communication and commerce. It has become an integral part of modern life, enabling instant access to information and connecting people across the globe. While it offers numerous benefits, we must also be mindful of its potential drawbacks, such as privacy concerns and the spread of misinformation."
+            },
+            {
+                title: "Level 10: Final Exam",
+                description: "Everything you've learned!",
+                text: "According to research published in the Journal of Neuroscience (Vol. 42, Issue 3), regular typing practice can improve cognitive function by up to 23%. Dr. Emily Wilson, lead researcher at MIT, states: 'The neurological benefits are comparable to learning a musical instrument.' Participants who typed 60+ WPM showed significant improvements in memory recall and problem-solving skills."
+            },
+            {
+                title: "Level 11: Advanced Punctuation",
+                description: "Practice with complex punctuation and symbols",
+                text: "The CEO's report (Q2 2023) showed a 15% increase; however, the CFO noted: \"We must consider 5-year trends ($2018-$2023).\""
+            },
+            {
+                title: "Level 12: Technical Terms",
+                description: "Type technical and scientific terminology",
+                text: "The quantum computing algorithm achieved 128-qubit coherence in 3.14 nanoseconds, surpassing SiO2 semiconductor benchmarks."
+            },
+            {
+                title: "Level 13: Multilingual Mix",
+                description: "Mixed English and Hindi words",
+                text: "The chai was garam, but the computer was frozen. मैंने laptop restart किया और फिर काम शुरू किया।"
+            },
+            {
+                title: "Level 14: Long Paragraph Challenge",
+                description: "Extended typing endurance test",
+                text: "In the heart of the jungle, where sunlight barely penetrated the dense canopy, a small expedition team led by Dr. Sharma carefully documented previously unknown species of flora and fauna. Their discoveries, published in the 'Journal of Tropical Ecology', could potentially rewrite our understanding of biodiversity in this region."
+            },
+            {
+                title: "Level 15: Code Snippets",
+                description: "Practice typing code",
+                text: "function calculateSum(arr) {\n  return arr.reduce((acc, val) => {\n    if (val % 2 === 0) acc += val;\n    return acc;\n  }, 0);\n}\nconsole.log(calculateSum([1,2,3,4,5])); // Output: 6"
+            },
+            {
+                title: "Level 16: Speed Marathon",
+                description: "Ultimate speed challenge",
+                text: "How quickly can your fingers fly across the keyboard when every second counts? This intense drill separates casual typists from true keyboard warriors. Focus, maintain accuracy, and push your limits as you race against the clock in this ultimate typing showdown!"
+            },
+            {
+                title: "Level 17: Special Character Mastery",
+                description: "Symbols and special characters",
+                text: "© ® ™ § ¶ • ¢ € ¥ £ ± ≠ ≤ ≥ ∞ µ π ∑ √ ∫ ≈ ~ ¬ ∧ ∨ ⇒ ⇔ ∀ ∃ ∄ ∅ ∈ ∉ ⊂ ⊃ ∪ ∩ ∴ ∵ ⊤ ⊥ ⊢ ⊨"
+            },
+            {
+                title: "Level 18: Poetry Typing",
+                description: "Type poetic formats",
+                text: "The woods are lovely, dark and deep,\nBut I have promises to keep,\nAnd miles to go before I sleep,\nAnd miles to go before I sleep.\n- Robert Frost"
+            },
+            {
+                title: "Level 19: Random Key Challenge",
+                description: "Mixed random key practice",
+                text: "jx7k qlz! p2v9 m5s@ r8t4 n1w? o0y# g6u$ b3i% a4c^ d*f& h(e)"
+            },
+            {
+                title: "Level 20: Final Mastery",
+                description: "All skills combined",
+                text: "According to NASA's JPL (Jet Propulsion Laboratory), the Mars 2020 Perseverance rover's mission (launched: 30/07/2020) discovered evidence suggesting that microbial life may have existed on Mars ~3.5 billion years ago. Dr. Swati Mohan, the Indian-American scientist who led guidance operations, stated: \"This fundamentally alters our understanding of life's potential in the universe.\""
+            }
+        ];
+
+        // Practice Mode Songs
+        const songs = {
+            iasmejo: {
+                lyrics: "IASME JO theme lyrics line 1\nIASME JO theme lyrics line 2\nIASME JO theme lyrics line 3\nIASME JO theme lyrics line 4\nIASME JO theme lyrics line 5\nIASME JO theme lyrics line 6\nIASME JO theme lyrics line 7\nIASME JO theme lyrics line 8\nIASME JO theme lyrics line 9\nIASME JO theme lyrics line 10",
+                lyrics: "IASME JO theme lyrics line 1\nIASME JO theme lyrics line 2\nIASME JO theme lyrics line 3\nIASME JO theme lyrics line 4\nIASME JO theme lyrics line 5\nIASME JO theme lyrics line 6\nIASME JO theme lyrics line 7\nIASME JO theme lyrics line 8\nIASME JO theme lyrics line 9\nIASME JO theme lyrics line 10",
+                lyrics: "IASME JO theme lyrics line 1\nIASME JO theme lyrics line 2\nIASME JO theme lyrics line 3\nIASME JO theme lyrics line 4\nIASME JO theme lyrics line 5\nIASME JO theme lyrics line 6\nIASME JO theme lyrics line 7\nIASME JO theme lyrics line 8\nIASME JO theme lyrics line 9\nIASME JO theme lyrics line 10",
+                chunkedLyrics: [
+                    "IASME JO theme lyrics line 1\nIASME JO theme lyrics line 2\nIASME JO theme lyrics line 3",
+                    "IASME JO theme lyrics line 4\nIASME JO theme lyrics line 5\nIASME JO theme lyrics line 6",
+                    "IASME JO theme lyrics line 7\nIASME JO theme lyrics line 8\nIASME JO theme lyrics line 9\nIASME JO theme lyrics line 10"
+                ],
+
+
+
+
+                audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+            },
+            pokemon: {
+                lyrics: "I wanna be the very best, like no one ever was. To catch them is my real test, to train them is my cause. I will travel across the land, searching far and wide. Each Pokemon to understand the power that's inside!",
+                audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+            },
+            shinchan: {
+                lyrics: "Pagal yeh pagal woh, pagal kar de jahan bhi yeh jaye, dekho karta hai kaisa deewana sabko. Mera naam bhi Shin Chan hai, mein shararat se bhara, badi mushkil mein padi, meri family nohara. C'mon baby, c'mon baby, aao karen dance shuru, zor se ghume hum tum jhoome, nacho nacho, dekho sabko hila doon. Kabhi yeh uchhalta, kabhi yeh machalta hai, har dum bekaboo, roz yeh karta hai, nayi nayi gadbad, tumko hasa dega Shin Chan.",
+                audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
+            },
+            powerrangers: {
+                lyrics: "Powerpuff Girls fighting crime, to save the world before bedtime! It's the time to shine when you're fighting crime! Who's got the power? We got the power! Breaking through the wall, gonna do it all, we don't quit! Flying high in the sky above, super sisters full of love! Keeping evil on the run, making friends and having fun! Blossom leads, Bubbles shines, Buttercup rocks hardcore, Sugar, Spice, and everything nice!",
+                audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
+            },
+            johnnytest: {
+                lyrics: "Ek ladka hai Johnny Test, baal hai aag jaise, turbo-charged backpack, uski behne use lab rat ki tarah istemal karti hain. Ek neat freak dad aur ek super-busy mom, aur uska sabse accha dost ek baat karne wala kutta hai! Teen extreme teens aur ek air-breathing shark, mega-action, game controller, skating in the park, phero-booster bling-bling, yeh sab kya hai?Johnny Test! Johnny Test! Yeh hai ek ladke ki zindagi, jiska naam hai Johnny Test!",
+                audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3"
+            },
+            tommijerry: {
+                lyrics: "Tom and Jerry, best of enemies, always in a fight. Tom the cat and Jerry mouse, chasing day and night. Slapstick comedy, funny situations, makes us laugh with all their crazy animations!",
+                audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3"
+            },
+            tarakmehta: {
+                lyrics: "Tarak Mehta ka Ooltah Chashmah, sabko pasand aata hai. Gokuldham society mein, masti chalta rahta hai. Jethalal aur Daya ki jodi, sabse anokhi hai. Babita ji ka makeup aur Popatlal ki kahani, sabse hatke hai!",
+                audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3"
+            },
+            motupatlu: {
+                lyrics: "Motu aur Patlu ki jodi, na dhela na damadi na kaudi, Motu ke pet mein bhukh bhari hai, taayar ke jaise bhukh bhari hai. Patlu to mar jaaye mungfali se, bachake nikal jaaye patali gali se. Dil ki sadak hain chaudi, Motu aur Patlu ki jodi. Pankh bina bhi ud jaate hain, har mushkil mein jud jaate hain, haath pakad ke chadh jaate hain, gaadi ya ho ghodi.",
+                audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"
+            },
+            rollno21: {
+                lyrics: "Arey, kans chal raha gehri chal, Mathura mein aaya bhoochaal, tab devalok se Mathura ki ore, chal pada ik maakhan chor.Dono kahani number one, iska roll no. 21.Hans ki baaton mein mishri ki goli, par bana raha asuron ki toli, toli-goli, goli-toli.Arey, dekh-dekh prabhu ki leela, school mein dekho ik balak hai neela.",
+                audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3"
+            }
+        };
+
+        // Avatar Options
+        const avatars = {
+            doraemon: {
+                name: "Soni",
+                emoji: "👵",
+                color: "#00A0E9",
+                image: ""
+            },
+            shinchan: {
+                name: "Jalpari",
+                emoji: "🧜‍♀️",
+                color: "#FF6B6B",
+                // image: "https://i.imgur.com/Lp3Yt5n.png"
+            },
+            pokemon: {
+                name: "Pikachu",
+                emoji: "⚡",
+                color: "#FFD700",
+                // image: "https://i.imgur.com/Vx5w0yL.png"
+            },
+            motu: {
+                name: "Ashish",
+                emoji: "🤡",
+                color: "#FF8C00",
+                // image: "https://i.imgur.com/8zN3wQp.png"
+            },
+            jerry: {
+                name: "Rudra",
+                emoji: "🧛‍♂️",
+                color: "#F7FFF7",
+                // image: "https://i.imgur.com/5XwWQbB.png"
+            },
+            powerpuff: {
+                name: "...",
+                emoji: "🕵️‍♂️",
+                color: "#FF69B4",
+                // image: "https://i.imgur.com/qJZtK9Q.png"
+            },
+            robot: {
+                name: "Robot",
+                emoji: "🤖",
+                color: "#4ECDC4",
+                // image: "https://i.imgur.com/9XwWQbC.png"
+            },
+            superhero: {
+                name: "Me",
+                emoji: "🦸",
+                color: "#6A5ACD",
+                // image: "https://i.imgur.com/7XwWQbD.png"
+            }
+        };
+
+        // Game State
+        let currentLevel = 0;
+        let completedLevels = JSON.parse(localStorage.getItem('completedLevels')) || [];
+        let currentPosition = 0;
+        let startTime = null;
+        let errors = 0;
+        let totalTyped = 0;
+        let lastTypedTime = null;
+        let wpmInterval = null;
+        let currentWPM = 0;
+        let correctChars = 0;
+        let lastCorrectChars = 0;
+        let profiles = JSON.parse(localStorage.getItem('typingProfiles')) || {};
+        let currentProfile = localStorage.getItem('currentProfile') || null;
+        let currentLine = 0;
+        let lines = [];
+        const MAX_LINE_LENGTH = 10;
+
+        // DOM Elements
+        const levelSelectEl = document.getElementById('level-select');
+        const gameAreaEl = document.getElementById('game-area');
+        const practiceModeEl = document.getElementById('practice-mode');
+        const instructionsEl = document.getElementById('instructions');
+        const targetTextEl = document.getElementById('target-text');
+        const userInputEl = document.getElementById('user-input');
+        const currentLevelEl = document.getElementById('current-level');
+        const progressEl = document.getElementById('progress');
+        const accuracyEl = document.getElementById('accuracy');
+        const progressBarEl = document.getElementById('progress-bar');
+        const restartBtnEl = document.getElementById('restart-btn');
+        const backBtnEl = document.getElementById('back-btn');
+        const songSelectEl = document.getElementById('song-select');
+        const startPracticeBtnEl = document.getElementById('start-practice');
+        const songLyricsEl = document.getElementById('song-lyrics');
+        const songPlayerEl = document.getElementById('song-player');
+        const wpmDisplayEl = document.getElementById('wpm-display');
+        const profileModalEl = document.getElementById('profile-modal');
+        const profileListEl = document.getElementById('profile-list');
+        const newProfileNameEl = document.getElementById('new-profile-name');
+        const addProfileBtnEl = document.getElementById('add-profile-btn');
+        const closeProfileModalEl = document.getElementById('close-profile-modal');
+        const profileBtnEl = document.getElementById('profile-btn');
+        const avatarGridEl = document.getElementById('avatar-grid');
+        const currentAvatarEl = document.getElementById('current-avatar');
+        const avatarNameEl = document.getElementById('avatar-name');
+
+        // Initialize the game
+        function init() {
+            renderLevelSelect();
+            setupProfileSystem();
+            
+            if (!currentProfile) {
+                showProfileModal();
+            } else {
+                updateProfileButton();
+            }
+            
+            // Event Listeners
+            restartBtnEl.addEventListener('click', restartLevel);
+            backBtnEl.addEventListener('click', backToLevels);
+            startPracticeBtnEl.addEventListener('click', startPractice);
+            
+            userInputEl.addEventListener('input', checkInput);
+            userInputEl.addEventListener('focus', () => {
+                if (startTime === null) {
+                    startTime = new Date();
+                    lastTypedTime = new Date();
+                    lastCorrectChars = 0;
+                    startWPMTracker();
+                }
+            });
+        }
+
+        // Profile System Functions
+        function setupProfileSystem() {
+            profileBtnEl.addEventListener('click', showProfileModal);
+            addProfileBtnEl.addEventListener('click', addNewProfile);
+            closeProfileModalEl.addEventListener('click', hideProfileModal);
+            renderAvatarGrid();
+            renderProfileList();
+        }
+
+        function showProfileModal() {
+            profileModalEl.style.display = 'flex';
+            renderProfileList();
+            updateAvatarDisplay();
+        }
+
+        function hideProfileModal() {
+            profileModalEl.style.display = 'none';
+        }
+
+        function renderAvatarGrid() {
+            avatarGridEl.innerHTML = '';
+            
+            Object.keys(avatars).forEach(avatarKey => {
+                const avatar = avatars[avatarKey];
+                const avatarEl = document.createElement('div');
+                avatarEl.title = avatar.name;
+                
+                if (avatar.image) {
+                    avatarEl.style.backgroundImage = `url(${avatar.image})`;
+                } else {
+                    avatarEl.textContent = avatar.emoji;
+                    avatarEl.style.backgroundColor = avatar.color;
+                }
+                
+                avatarEl.addEventListener('click', () => selectAvatar(avatarKey));
+                avatarGridEl.appendChild(avatarEl);
+            });
+        }
+
+        function selectAvatar(avatarKey) {
+            if (!currentProfile) return;
+            
+            profiles[currentProfile].avatar = avatarKey;
+            localStorage.setItem('typingProfiles', JSON.stringify(profiles));
+            updateAvatarDisplay();
+            updateProfileButton();
+        }
+
+        function updateAvatarDisplay() {
+            if (currentProfile && profiles[currentProfile].avatar) {
+                const avatar = avatars[profiles[currentProfile].avatar];
+                currentAvatarEl.textContent = avatar.emoji;
+                currentAvatarEl.style.backgroundColor = avatar.color;
+                if (avatar.image) {
+                    currentAvatarEl.style.backgroundImage = `url(${avatar.image})`;
+                }
+                avatarNameEl.textContent = avatar.name;
+            } else {
+                currentAvatarEl.textContent = '👤';
+                currentAvatarEl.style.backgroundColor = 'var(--secondary)';
+                currentAvatarEl.style.backgroundImage = 'none';
+                avatarNameEl.textContent = 'Select Avatar';
+            }
+        }
+
+        function renderProfileList() {
+            profileListEl.innerHTML = '';
+            
+            Object.keys(profiles).forEach(profileName => {
+                const profile = profiles[profileName];
+                const isCurrent = profileName === currentProfile;
+                
+                const profileEl = document.createElement('div');
+                profileEl.style.display = 'flex';
+                profileEl.style.justifyContent = 'space-between';
+                profileEl.style.alignItems = 'center';
+                profileEl.style.padding = '1rem';
+                profileEl.style.marginBottom = '0.5rem';
+                profileEl.style.background = isCurrent ? 'rgba(78, 205, 196, 0.2)' : 'rgba(255,255,255,0.1)';
+                profileEl.style.borderRadius = '8px';
+                profileEl.style.cursor = 'pointer';
+                
+                let avatarContent = '👤';
+                if (profile.avatar) {
+                    const avatar = avatars[profile.avatar];
+                    avatarContent = avatar.emoji;
+                }
+                
+                profileEl.innerHTML = `
+                    <div>
+                        <strong style="color:${isCurrent ? 'var(--accent)' : 'white'}">${avatarContent} ${profileName}</strong>
+                        <div style="font-size:0.8rem; color:#ccc;">
+                            Highest: ${profile.highestWPM || 0} WPM | Avg: ${profile.averageWPM || 0} WPM
+                        </div>
+                    </div>
+                    ${isCurrent ? '<span style="color:var(--accent)">✓</span>' : ''}
+                `;
+                
+                profileEl.addEventListener('click', () => switchProfile(profileName));
+                profileListEl.appendChild(profileEl);
+            });
+        }
+
+        function addNewProfile() {
+            const profileName = newProfileNameEl.value.trim();
+            if (!profileName) return;
+            
+            if (!profiles[profileName]) {
+                profiles[profileName] = {
+                    created: new Date().toISOString(),
+                    highestWPM: 0,
+                    lowestWPM: Infinity,
+                    averageWPM: 0,
+                    totalTests: 0,
+                    completedLevels: [],
+                    history: [],
+                    avatar: null
+                };
+                localStorage.setItem('typingProfiles', JSON.stringify(profiles));
+            }
+            
+            switchProfile(profileName);
+            newProfileNameEl.value = '';
+            renderProfileList();
+        }
+
+        function switchProfile(profileName) {
+            currentProfile = profileName;
+            localStorage.setItem('currentProfile', profileName);
+            completedLevels = profiles[profileName].completedLevels || [];
+            renderProfileList();
+            renderLevelSelect();
+            updateAvatarDisplay();
+            updateProfileButton();
+            hideProfileModal();
+        }
+
+        function updateProfileButton() {
+            if (currentProfile) {
+                const profile = profiles[currentProfile];
+                let avatarContent = '👤';
+                
+                if (profile.avatar) {
+                    const avatar = avatars[profile.avatar];
+                    if (avatar.image) {
+                        avatarContent = `<img src="${avatar.image}" style="width:20px; height:20px; border-radius:50%; vertical-align:middle;">`;
+                    } else {
+                        avatarContent = avatar.emoji;
+                    }
+                }
+                
+                profileBtnEl.innerHTML = `
+                    ${avatarContent} ${currentProfile} 
+                    <small style="font-size:0.8em;">(${profile.highestWPM || 0} WPM)</small>
+                `;
+            } else {
+                profileBtnEl.textContent = 'Profiles';
+            }
+        }
+
+        function updateProfileStats(wpm, accuracy, level) {
+            if (!currentProfile) return;
+            
+            const profile = profiles[currentProfile];
+            const testResult = {
+                date: new Date().toISOString(),
+                wpm,
+                accuracy,
+                level
+            };
+            
+            // Update highest WPM
+            if (wpm > profile.highestWPM) {
+                profile.highestWPM = wpm;
+            }
+            
+            // Update lowest WPM
+            if (wpm < profile.lowestWPM) {
+                profile.lowestWPM = wpm;
+            }
+            
+            // Update average WPM
+            profile.totalTests++;
+            profile.averageWPM = Math.round(
+                ((profile.averageWPM * (profile.totalTests - 1)) + wpm) / profile.totalTests
+            );
+            
+            // Add to history (keep last 20 tests)
+            profile.history.unshift(testResult);
+            if (profile.history.length > 20) {
+                profile.history.pop();
+            }
+            
+            // Update completed levels
+            if (level !== undefined && !profile.completedLevels.includes(level)) {
+                profile.completedLevels.push(level);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('typingProfiles', JSON.stringify(profiles));
+            
+            // Update profile button
+            updateProfileButton();
+        }
+
+        // Start WPM tracking
+        function startWPMTracker() {
+            clearInterval(wpmInterval);
+            wpmInterval = setInterval(calculateWPM, 1000);
+        }
+
+        // Calculate real-time WPM (more accurate version)
+        function calculateWPM() {
+            if (!startTime) return;
+            
+            const now = new Date();
+            const minutes = (now - startTime) / 60000;
+            
+            // Calculate WPM based on correct characters (5 chars = 1 word)
+            const words = correctChars / 5;
+            currentWPM = Math.max(0, Math.floor(words / minutes));
+            
+            wpmDisplayEl.textContent = `${currentWPM} WPM`;
+        }
+
+        // Render level selection screen
+        function renderLevelSelect() {
+            levelSelectEl.innerHTML = '';
+            
+            levels.forEach((level, index) => {
+                const levelBtn = document.createElement('button');
+                levelBtn.className = 'level-btn';
+                levelBtn.textContent = index + 1;
+                
+                if (completedLevels.includes(index)) {
+                    levelBtn.classList.add('completed');
+                } else if (index > 0 && !completedLevels.includes(index - 1)) {
+                    levelBtn.classList.add('locked');
+                }
+                
+                levelBtn.addEventListener('click', () => {
+                    if (!levelBtn.classList.contains('locked')) {
+                        startLevel(index);
+                    }
+                });
+                
+                levelSelectEl.appendChild(levelBtn);
+            });
+        }
+
+        // Start a level
+        function startLevel(levelIndex) {
+            currentLevel = levelIndex;
+            const level = levels[levelIndex];
+            
+            // Update UI
+            gameAreaEl.style.display = 'block';
+            practiceModeEl.style.display = 'none';
+            levelSelectEl.style.display = 'none';
+            
+            instructionsEl.innerHTML = `<h2>${level.title}</h2><p>${level.description}</p>`;
+            currentLevelEl.textContent = levelIndex + 1;
+            
+            // Prepare text
+            prepareText(level.text);
+            
+            // Reset stats
+            currentPosition = 0;
+            startTime = null;
+            errors = 0;
+            totalTyped = 0;
+            correctChars = 0;
+            lastCorrectChars = 0;
+            currentWPM = 0;
+            updateStats();
+            
+            // Focus input
+            userInputEl.value = '';
+            userInputEl.disabled = false;
+            userInputEl.focus();
+        }
+
+        // Prepare text by splitting into lines
+        function prepareText(text) {
+            const words = text.split(' ');
+            lines = [];
+            for (let i = 0; i < words.length; i += MAX_LINE_LENGTH) {
+                lines.push(words.slice(i, i + MAX_LINE_LENGTH).join(' '));
+            }
+            currentLine = 0;
+            showCurrentLine();
+        }
+
+        // Show current line
+        function showCurrentLine() {
+            targetTextEl.innerHTML = '';
+            if (currentLine < lines.length) {
+                renderText(lines[currentLine]);
+            }
+        }
+
+        // Render the text to be typed
+        function renderText(text) {
+            targetTextEl.innerHTML = '';
+            
+            text.split('').forEach((char, index) => {
+                const span = document.createElement('span');
+                span.textContent = char;
+                if (index === 0) {
+                    span.className = 'current';
+                }
+                targetTextEl.appendChild(span);
+            });
+        }
+
+        // Check user input against target text
+        function checkInput(e) {
+            const inputText = e.target.value;
+            const targetText = lines[currentLine];
+            const targetSpans = targetTextEl.querySelectorAll('span');
+            
+            // Update last typed time for WPM calculation
+            lastTypedTime = new Date();
+            
+            // Reset all spans
+            targetSpans.forEach(span => {
+                span.className = '';
+            });
+            
+            // Update current position and check correctness
+            let allCorrect = true;
+            correctChars = 0; // Reset correct chars count
+            
+            for (let i = 0; i < inputText.length; i++) {
+                if (i >= targetText.length) break;
+                
+                if (inputText[i] === targetText[i]) {
+                    targetSpans[i].className = 'correct';
+                    correctChars++;
+                } else {
+                    targetSpans[i].className = 'incorrect';
+                    allCorrect = false;
+                    if (i === inputText.length - 1) {
+                        errors++;
+                    }
+                }
+                
+                totalTyped++;
+            }
+            
+            // Highlight current position
+            if (inputText.length < targetText.length) {
+                targetSpans[inputText.length].className = 'current';
+            }
+            
+            currentPosition = inputText.length;
+            updateStats();
+            
+            // Check if line is complete
+            if (inputText === targetText) {
+                if (currentLine < lines.length - 1) {
+                    currentLine++;
+                    showCurrentLine();
+                    userInputEl.value = '';
+                } else {
+                    levelComplete();
+                }
+            }
+        }
+
+        // Update statistics display
+        function updateStats() {
+            const targetText = lines[currentLine];
+            const progress = Math.min(100, Math.floor((currentPosition / targetText.length) * 100));
+            
+            progressEl.textContent = `${progress}%`;
+            progressBarEl.style.width = `${progress}%`;
+            
+            const accuracy = totalTyped > 0 
+                ? Math.max(0, Math.floor((correctChars / totalTyped) * 100))
+                : 100;
+            accuracyEl.textContent = `${accuracy}%`;
+        }
+
+        // Handle level completion
+        function levelComplete() {
+            const endTime = new Date();
+            const minutes = (endTime - startTime) / 60000;
+            const words = correctChars / 5;
+            const finalWPM = Math.floor(words / minutes);
+            const accuracy = totalTyped > 0 ? Math.max(0, Math.floor((correctChars / totalTyped) * 100)) : 100;
+            
+            // Update profile stats
+            updateProfileStats(finalWPM, accuracy, currentLevel);
+            
+            // Show completion message
+            instructionsEl.innerHTML += `
+                <div style="margin-top: 1rem; padding: 1rem; background-color: rgba(0,255,0,0.2); border-radius: 8px;">
+                    <h3>Level Complete! 🎉</h3>
+                    <p>Your typing speed: ${finalWPM} WPM</p>
+                    <p>Accuracy: ${accuracy}%</p>
+                </div>
+            `;
+            
+            // Create confetti effect
+            createConfetti();
+            
+            // Stop WPM tracking
+            clearInterval(wpmInterval);
+            
+            // Disable input
+            userInputEl.disabled = true;
+        }
+
+        // Create confetti animation
+        function createConfetti() {
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = `${Math.random() * 100}vw`;
+                    confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                    confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3000);
+                }, i * 50);
+            }
+        }
+
+        // Restart current level
+        function restartLevel() {
+            startLevel(currentLevel);
+        }
+
+        // Go back to level selection
+        function backToLevels() {
+            gameAreaEl.style.display = 'none';
+            practiceModeEl.style.display = 'block';
+            levelSelectEl.style.display = 'grid';
+            clearInterval(wpmInterval);
+            wpmDisplayEl.textContent = '0 WPM';
+            renderLevelSelect();
+        }
+
+        // Start practice with selected song
+        function startPractice() {
+            const selectedSong = songSelectEl.value;
+            const song = songs[selectedSong];
+            
+            // Update UI
+            gameAreaEl.style.display = 'block';
+            practiceModeEl.style.display = 'none';
+            levelSelectEl.style.display = 'none';
+            
+            instructionsEl.innerHTML = `<h2>🎵 ${songSelectEl.options[songSelectEl.selectedIndex].text} 🎵</h2><p>Type along with the song lyrics!</p>`;
+            currentLevelEl.textContent = "🎶";
+            
+            // Prepare text
+            prepareText(song.lyrics);
+            
+            // Reset stats
+            currentPosition = 0;
+            startTime = null;
+            errors = 0;
+            totalTyped = 0;
+            correctChars = 0;
+            lastCorrectChars = 0;
+            currentWPM = 0;
+            updateStats();
+            
+            // Set up audio player
+            songPlayerEl.src = song.audio;
+            songPlayerEl.style.display = 'block';
+            
+            // Focus input
+            userInputEl.value = '';
+            userInputEl.disabled = false;
+            userInputEl.focus();
+        }
+
+        // Initialize the game
+        init();
+    </script>
+</body>
+</html>
